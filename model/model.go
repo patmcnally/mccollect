@@ -1,6 +1,5 @@
 package model
 
-// Pack represents a release pack.
 type Pack struct {
 	Code         string  `json:"code"`
 	Name         string  `json:"name"`
@@ -12,9 +11,22 @@ type Pack struct {
 	Size         *int    `json:"size,omitempty"`
 }
 
-// Set represents a card set.
 type Set struct {
 	Code            string `json:"code"`
 	Name            string `json:"name"`
 	CardSetTypeCode string `json:"card_set_type_code"`
+}
+
+// Card is a placeholder — full struct comes later.
+type Card struct {
+	Code        string `json:"code"`
+	Name        string `json:"name"`
+	TypeCode    string `json:"type_code"`
+	FactionCode string `json:"faction_code"`
+	PackCode    string `json:"pack_code"`
+}
+
+type PackOwnership struct {
+	Pack  Pack `json:"pack"`
+	Owned bool `json:"owned"`
 }
