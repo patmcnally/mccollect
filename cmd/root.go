@@ -7,6 +7,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	dbPath   string
+	dataPath string
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "mccollect",
 	Short: "Marvel Champions collection manager",
@@ -20,4 +25,8 @@ func Execute() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+func init() {
+	rootCmd.PersistentFlags().StringVar(&dbPath, "db", "cards.db", "path to SQLite database")
 }

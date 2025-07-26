@@ -1,35 +1,31 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
 
+	"github.com/patmcnally/mccollect/db"
 	"github.com/patmcnally/mccollect/importer"
 	"github.com/spf13/cobra"
 )
 
-var dataPath string
-
 var importCmd = &cobra.Command{
 	Use:   "import",
-	Short: "Import card data from marvelsdb-json-data",
+	Short: "Full import of card data from marvelsdb-json-data",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if dataPath == "" {
 			return fmt.Errorf("--data is required")
 		}
-		packs, err := importer.LoadPacks(dataPath)
+		d, err := db.Open(dbPath)
 		if err != nil {
 			return err
 		}
-		sets, err := importer.LoadSets(dataPath)
+		defer d.Close()
+
+		result, err := importer.FullImport(d, dataPath)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("loaded %d packs, %d sets from %s\n", len(packs), len(sets), filepath.Base(dataPath))
-		_ = json.Marshal // suppress import
-		_ = os.Stdout
+		fmt.Printf("imported %d cards from %d packs (%d sets)\n", result.Cards, result.Packs, result.Sets)
 		return nil
 	},
 }
