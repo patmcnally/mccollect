@@ -6,8 +6,10 @@ import (
 	"github.com/patmcnally/mccollect/model"
 )
 
+// UpsertPacks inserts or replaces packs within a transaction.
 func (d *DB) UpsertPacks(tx *sql.Tx, packs []model.Pack) error {
-	stmt, err := tx.Prepare(`INSERT OR REPLACE INTO packs (code,name,cgdb_id,octgn_id,date_release,pack_type_code,position,size) VALUES (?,?,?,?,?,?,?,?)`)
+	stmt, err := tx.Prepare(`INSERT OR REPLACE INTO packs (code, name, cgdb_id, octgn_id, date_release, pack_type_code, position, size)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		return err
 	}
@@ -20,8 +22,9 @@ func (d *DB) UpsertPacks(tx *sql.Tx, packs []model.Pack) error {
 	return nil
 }
 
+// ListPacks returns all packs ordered by release date.
 func (d *DB) ListPacks() ([]model.Pack, error) {
-	rows, err := d.conn.Query("SELECT code,name,cgdb_id,octgn_id,date_release,pack_type_code,position,size FROM packs ORDER BY date_release,position")
+	rows, err := d.conn.Query("SELECT code, name, cgdb_id, octgn_id, date_release, pack_type_code, position, size FROM packs ORDER BY date_release, position")
 	if err != nil {
 		return nil, err
 	}
@@ -35,4 +38,33 @@ func (d *DB) ListPacks() ([]model.Pack, error) {
 		packs = append(packs, p)
 	}
 	return packs, rows.Err()
+}
+
+// PackCodeByName returns a map of lowercase pack name to pack code.
+func (d *DB) PackCodeByName() (map[string]string, error) {
+	rows, err := d.conn.Query("SELECT code, name FROM packs")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	m := make(map[string]string)
+	for rows.Next() {
+		var code, name string
+		if err := rows.Scan(&code, &name); err != nil {
+			return nil, err
+		}
+		m[toLower(name)] = code
+	}
+	return m, rows.Err()
+}
+
+func toLower(s string) string {
+	// Simple ASCII-safe lowercase for pack names
+	b := []byte(s)
+	for i, c := range b {
+		if c >= 'A' && c <= 'Z' {
+			b[i] = c + 32
+		}
+	}
+	return string(b)
 }
