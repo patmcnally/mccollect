@@ -10,8 +10,8 @@ var (
 	blockSplit = regexp.MustCompile(`<div class="col-md-3 col-sm-4 cycle">`)
 	catLabel   = regexp.MustCompile(`<label>([^<]+)</label>`)
 	packEntry  = regexp.MustCompile(`<label([^>]+)>([^<]+)</label>`)
-	dataID     = regexp.MustCompile(`data-id="(\d+)"`)
-	classAttr  = regexp.MustCompile(`class="([^"]*)"`)
+	dataID     = regexp.MustCompile(`\bdata-id="(\d+)"`)
+	classAttr  = regexp.MustCompile(`\bclass="([^"]*)"`)
 )
 
 type CollectionEntry struct {
@@ -50,8 +50,8 @@ func ParseCollectionHTML(html string) map[string][]CollectionEntry {
 				continue
 			}
 			name := strings.TrimSpace(m[2])
-			// BUG: checking for "checked" attribute instead of "active" class
-			owned := strings.Contains(attrs, "checked")
+			classMatch := classAttr.FindStringSubmatch(attrs)
+			owned := classMatch != nil && strings.Contains(classMatch[1], "active")
 			result[catKey] = append(result[catKey], CollectionEntry{Name: name, Owned: owned})
 		}
 	}
