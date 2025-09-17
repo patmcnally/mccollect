@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/patmcnally/mccollect/db"
 	"github.com/patmcnally/mccollect/importer"
@@ -11,10 +13,12 @@ import (
 var importCmd = &cobra.Command{
 	Use:   "import",
 	Short: "Full import of card data from marvelsdb-json-data",
+	Long:  "Wipe and rebuild the database from a local marvelsdb-json-data clone.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if dataPath == "" {
 			return fmt.Errorf("--data is required")
 		}
+
 		d, err := db.Open(dbPath)
 		if err != nil {
 			return err
@@ -25,7 +29,13 @@ var importCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Printf("imported %d cards from %d packs (%d sets)\n", result.Cards, result.Packs, result.Sets)
+
+		if jsonOut {
+			return json.NewEncoder(os.Stdout).Encode(result)
+		}
+
+		fmt.Printf("Imported %d cards from %d packs (%d sets) → %s\n", result.Cards, result.Packs, result.Sets, dbPath)
+		fmt.Printf("Data commit: %s\n", result.Commit)
 		return nil
 	},
 }

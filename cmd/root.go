@@ -9,6 +9,7 @@ import (
 
 var (
 	dbPath   string
+	jsonOut  bool
 	dataPath string
 )
 
@@ -29,4 +30,5 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&dbPath, "db", "cards.db", "path to SQLite database")
+	rootCmd.PersistentFlags().BoolVar(&jsonOut, "json", false, "output JSON")
 }
