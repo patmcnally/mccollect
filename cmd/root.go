@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -16,8 +17,9 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "mccollect",
 	Short: "Marvel Champions collection manager",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("use --help for available commands")
+	Long:  "Manage your Marvel Champions: The Card Game collection.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runTUI()
 	},
 }
 
@@ -28,7 +30,13 @@ func Execute() {
 	}
 }
 
+func defaultDBPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil { return "cards.db" }
+	return filepath.Join(home, ".config", "mccollect", "cards.db")
+}
+
 func init() {
-	rootCmd.PersistentFlags().StringVar(&dbPath, "db", "cards.db", "path to SQLite database")
-	rootCmd.PersistentFlags().BoolVar(&jsonOut, "json", false, "output JSON")
+	rootCmd.PersistentFlags().StringVar(&dbPath, "db", defaultDBPath(), "path to SQLite database")
+	rootCmd.PersistentFlags().BoolVar(&jsonOut, "json", false, "output JSON instead of human-readable text")
 }
