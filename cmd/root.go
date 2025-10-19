@@ -17,7 +17,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "mccollect",
 	Short: "Marvel Champions collection manager",
-	Long:  "Manage your Marvel Champions: The Card Game collection.",
+	Long:  "Manage your Marvel Champions: The Card Game collection — import card data, track pack ownership, and browse your collection.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runTUI()
 	},
@@ -30,9 +30,13 @@ func Execute() {
 	}
 }
 
+// defaultDBPath returns ~/.config/mccollect/cards.db, falling back to
+// "references/cards.db" if the home directory cannot be determined.
 func defaultDBPath() string {
 	home, err := os.UserHomeDir()
-	if err != nil { return "cards.db" }
+	if err != nil {
+		return "references/cards.db"
+	}
 	return filepath.Join(home, ".config", "mccollect", "cards.db")
 }
 
